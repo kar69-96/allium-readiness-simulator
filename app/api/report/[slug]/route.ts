@@ -1,0 +1,14 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getReport } from "@/lib/storage";
+
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  const report = await getReport(slug);
+  if (!report) {
+    return NextResponse.json({ error: "Report not found" }, { status: 404 });
+  }
+  return NextResponse.json(report);
+}
