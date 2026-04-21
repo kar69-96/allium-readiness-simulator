@@ -19,10 +19,10 @@ const DIMENSION_WEIGHTS: Record<string, string> = {
   on_chain_readiness: "15%",
 };
 
-function scoreColor(score: number): string {
-  if (score >= 70) return "bg-emerald-500";
-  if (score >= 45) return "bg-yellow-500";
-  return "bg-red-500";
+function scoreConfig(score: number) {
+  if (score >= 70) return { bar: "#059669", bg: "#D1FAE5", text: "#065F46" };
+  if (score >= 45) return { bar: "#D97706", bg: "#FEF3C7", text: "#92400E" };
+  return { bar: "#DC2626", bg: "#FEE2E2", text: "#991B1B" };
 }
 
 interface Props {
@@ -34,39 +34,55 @@ export default function DimensionBars({ dimensions }: Props) {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold text-white">Dimension Breakdown</h2>
-      {Object.entries(dimensions).map(([key, dim]) => (
-        <div key={key} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-          <button
-            className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-gray-800/50 transition-colors"
-            onClick={() => setExpanded(expanded === key ? null : key)}
+      <div className="mb-1">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-[#6B7280]">
+          Dimension Breakdown
+        </h2>
+        <p className="text-xs text-[#9CA3AF] mt-0.5">Click any dimension to read the rationale</p>
+      </div>
+      {Object.entries(dimensions).map(([key, dim]) => {
+        const cfg = scoreConfig(dim.score);
+        return (
+          <div
+            key={key}
+            className="bg-white rounded-2xl border border-[#E5E0D8] overflow-hidden shadow-sm"
           >
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-200">{DIMENSION_LABELS[key]}</span>
-                <span className="text-xs text-gray-500 ml-2 shrink-0">
-                  weight {DIMENSION_WEIGHTS[key]}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-gray-800 rounded-full h-2">
+            <button
+              className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-[#FAF8F4] transition-colors"
+              onClick={() => setExpanded(expanded === key ? null : key)}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-[#1A1A1A]">
+                    {DIMENSION_LABELS[key]}
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    <span className="text-xs text-[#9CA3AF]">wt {DIMENSION_WEIGHTS[key]}</span>
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: cfg.bg, color: cfg.text }}
+                    >
+                      {dim.score}
+                    </span>
+                  </div>
+                </div>
+                <div className="w-full bg-[#F0EBE3] rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all duration-700 ${scoreColor(dim.score)}`}
-                    style={{ width: `${dim.score}%` }}
+                    className="h-2 rounded-full transition-all duration-700"
+                    style={{ width: `${dim.score}%`, backgroundColor: cfg.bar }}
                   />
                 </div>
-                <span className="text-sm font-bold text-white w-8 text-right">{dim.score}</span>
               </div>
-            </div>
-            <span className="text-gray-600 text-xs">{expanded === key ? "▲" : "▼"}</span>
-          </button>
-          {expanded === key && (
-            <div className="px-5 pb-4 text-sm text-gray-400 border-t border-gray-800 pt-3">
-              {dim.rationale}
-            </div>
-          )}
-        </div>
-      ))}
+              <span className="text-[#9CA3AF] text-xs ml-2">{expanded === key ? "▲" : "▼"}</span>
+            </button>
+            {expanded === key && (
+              <div className="px-5 pb-5 pt-1 text-sm text-[#6B7280] border-t border-[#F0EBE3] leading-relaxed">
+                {dim.rationale}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

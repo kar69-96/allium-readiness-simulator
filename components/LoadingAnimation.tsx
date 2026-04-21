@@ -22,9 +22,9 @@ export default function LoadingAnimation() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 rounded-full border-4 border-gray-700" />
-        <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
+      <div className="relative w-14 h-14">
+        <div className="absolute inset-0 rounded-full border-4 border-[#E9D5FF]" />
+        <div className="absolute inset-0 rounded-full border-4 border-[#B66AD1] border-t-transparent animate-spin" />
       </div>
       <div className="text-center space-y-2">
         {STEPS.map((step, i) => (
@@ -32,10 +32,10 @@ export default function LoadingAnimation() {
             key={step}
             className={`text-sm transition-all duration-500 ${
               i < currentStep
-                ? "text-gray-600 line-through"
+                ? "text-[#9CA3AF] line-through"
                 : i === currentStep
-                ? "text-emerald-400 font-medium"
-                : "text-gray-700"
+                ? "text-[#B66AD1] font-medium"
+                : "text-[#D1C4C4]"
             }`}
           >
             {i < currentStep ? "✓ " : i === currentStep ? "→ " : "  "}
@@ -43,7 +43,7 @@ export default function LoadingAnimation() {
           </p>
         ))}
       </div>
-      <p className="text-xs text-gray-600">This takes 15–30 seconds</p>
+      <p className="text-xs text-[#9CA3AF]">This takes 15–30 seconds</p>
     </div>
   );
 }

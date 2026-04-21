@@ -1,84 +1,42 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import LoadingAnimation from "./LoadingAnimation";
 
-export default function CompanyInput() {
-  const router = useRouter();
+interface Props {
+  onSubmit: (companyName: string) => void;
+  error?: string | null;
+}
+
+export default function CompanyInput({ onSubmit, error }: Props) {
   const [companyName, setCompanyName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!companyName.trim()) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company_name: companyName.trim() }),
-      });
-
-      const raw = await res.text();
-      let payload: { slug?: string; error?: string } | null = null;
-      if (raw.trim()) {
-        try {
-          payload = JSON.parse(raw) as { slug?: string; error?: string };
-        } catch {
-          throw new Error(
-            res.ok
-              ? "Invalid response from server. Please try again."
-              : `Request failed (${res.status}). Please try again.`
-          );
-        }
-      }
-
-      if (!res.ok) {
-        throw new Error(
-          payload?.error ?? `Request failed (${res.status}). Please try again.`
-        );
-      }
-
-      if (!payload?.slug) {
-        throw new Error("Invalid response from server. Please try again.");
-      }
-
-      router.push(`/report/${payload.slug}`);
-    } catch (err) {
-      setLoading(false);
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-    }
+    onSubmit(companyName.trim());
   }
 
-  if (loading) return <LoadingAnimation />;
-
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-4">
-      <div className="relative">
+    <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-3">
+      <div className="flex gap-3">
         <input
           type="text"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
           placeholder="Enter company name (e.g. Stripe, Remitly, Shopify)"
-          className="w-full px-5 py-4 text-lg rounded-xl border border-gray-700 bg-gray-900 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="flex-1 px-5 py-4 text-base rounded-xl border border-[#E5E0D8] bg-white text-[#1A1A1A] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#B66AD1] focus:border-transparent shadow-sm"
           autoFocus
-          disabled={loading}
         />
+        <button
+          type="submit"
+          disabled={!companyName.trim()}
+          className="px-6 py-4 rounded-xl bg-[#B66AD1] hover:bg-purple-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm tracking-wide transition-colors shadow-sm whitespace-nowrap"
+        >
+          Analyze →
+        </button>
       </div>
-      <button
-        type="submit"
-        disabled={!companyName.trim() || loading}
-        className="w-full py-4 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-semibold text-lg transition-colors"
-      >
-        Generate Readiness Report
-      </button>
       {error && (
-        <p className="text-red-400 text-sm text-center">{error}</p>
+        <p className="text-red-500 text-sm text-center">{error}</p>
       )}
     </form>
   );
