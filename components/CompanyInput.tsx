@@ -24,13 +24,31 @@ export default function CompanyInput() {
         body: JSON.stringify({ company_name: companyName.trim() }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Something went wrong. Please try again.");
+      const raw = await res.text();
+      let payload: { slug?: string; error?: string } | null = null;
+      if (raw.trim()) {
+        try {
+          payload = JSON.parse(raw) as { slug?: string; error?: string };
+        } catch {
+          throw new Error(
+            res.ok
+              ? "Invalid response from server. Please try again."
+              : `Request failed (${res.status}). Please try again.`
+          );
+        }
       }
 
-      const { slug } = await res.json();
-      router.push(`/report/${slug}`);
+      if (!res.ok) {
+        throw new Error(
+          payload?.error ?? `Request failed (${res.status}). Please try again.`
+        );
+      }
+
+      if (!payload?.slug) {
+        throw new Error("Invalid response from server. Please try again.");
+      }
+
+      router.push(`/report/${payload.slug}`);
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");

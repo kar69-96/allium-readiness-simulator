@@ -65,13 +65,16 @@ async function callClaude(input: CompanyInput, retryPrompt?: string): Promise<st
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-5",
-    max_tokens: 1024,
+    // Full SimulatorReport JSON is ~1.5–4k tokens; 1024 truncates and breaks JSON.parse
+    max_tokens: 8192,
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: userContent }],
   });
 
   const block = response.content[0];
-  if (block.type !== "text") throw new Error("Unexpected response type from Claude");
+  if (!block || block.type !== "text") {
+    throw new Error("Unexpected response type from Claude");
+  }
   return block.text;
 }
 
@@ -82,9 +85,12 @@ export async function generateReport(input: CompanyInput): Promise<SimulatorRepo
   try {
     parsed = JSON.parse(stripMarkdownFences(rawText));
   } catch {
-    // Retry once with explicit JSON instruction
     rawText = await callClaude(input, "Return only valid JSON. No markdown, no explanation, no preamble.");
-    parsed = JSON.parse(stripMarkdownFences(rawText));
+    try {
+      parsed = JSON.parse(stripMarkdownFences(rawText));
+    } catch {
+      throw new Error("Claude returned invalid JSON after retry");
+    }
   }
 
   return parsed as SimulatorReport;

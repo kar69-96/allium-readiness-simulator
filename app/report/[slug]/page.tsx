@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { SimulatorReport } from "@/types/report";
+import { getReport } from "@/lib/storage";
 import ScoreGauge from "@/components/report/ScoreGauge";
 import DollarHighlights from "@/components/report/DollarHighlights";
 import DimensionBars from "@/components/report/DimensionBars";
@@ -7,24 +7,13 @@ import UseCasePills from "@/components/report/UseCasePills";
 import InsightBlock from "@/components/report/InsightBlock";
 import CTASection from "@/components/report/CTASection";
 
-async function fetchReport(slug: string): Promise<SimulatorReport | null> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/report/${slug}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
 export default async function ReportPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const report = await fetchReport(slug);
+  const report = await getReport(slug);
 
   if (!report) notFound();
 

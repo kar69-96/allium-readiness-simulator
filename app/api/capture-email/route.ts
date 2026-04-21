@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReport } from "@/lib/storage";
-import { submitEmail } from "@/lib/hubspot";
+import { submitEmail } from "@/lib/leads";
 
 export async function POST(req: NextRequest) {
   let body: { email?: string; slug?: string };
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   await submitEmail(email, slug, report).catch((e) =>
-    console.error("Email capture HubSpot submit failed:", e)
+    console.error("Email capture leads webhook failed:", e)
   );
 
   return NextResponse.json({ ok: true });
